@@ -39,26 +39,26 @@ export default function Contact() {
                 {
                   icon: Phone,
                   label: "Утас",
-                  value: "+976 9911-XXXX",
-                  sub: "Да-Ба 10:00–19:00",
+                  value: "+976 8976-4650",
+                  sub: "Мягмар–Бүтэнсайн 10:00–20:00",
                 },
                 {
                   icon: Mail,
                   label: "И-мэйл",
-                  value: "info@uranjewelry.mn",
+                  value: "togosxonurnaa@gmail.com",
                   sub: "24 цагийн дотор хариулна",
                 },
                 {
                   icon: MapPin,
                   label: "Хаяг",
-                  value: "Улаанбаатар хот, Монгол улс",
+                  value: "Central Mall, 2 давхар",
                   sub: "Дэлгүүрт биечлэн ирж болно",
                 },
                 {
                   icon: Clock,
                   label: "Цагийн хуваарь",
-                  value: "Даваа–Баасан: 10:00–19:00",
-                  sub: "Бямба: 11:00–17:00",
+                  value: "Мягмар–Бүтэнсайн: 10:00–20:00",
+                  sub: "",
                 },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-4">
