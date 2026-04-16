@@ -21,7 +21,7 @@ const BANK = {
   name: "Хаан Банк",
   account: "5570137620",
   iban: "91000500",
-  holder: "Уран Жювелри ХХК",
+  holder: "Б.Урантогс",
 };
 
 type Step = "cart" | "checkout" | "success";
