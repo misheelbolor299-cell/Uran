@@ -4,7 +4,6 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ProductGrid from "./components/ProductGrid";
 import Features from "./components/Features";
-import Reviews from "./components/Reviews";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import CartModal, { CartItem } from "./components/CartModal";
@@ -54,7 +53,6 @@ function StoreFront() {
       <Hero />
       <ProductGrid addToCart={addToCart} />
       <Features />
-      <Reviews />
       <Contact />
       <Footer />
       <CartModal
