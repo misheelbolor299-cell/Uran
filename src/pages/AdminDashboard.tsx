@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Plus, X, Check, Eye, Tag } from "lucide-react";
+import { Trash2, Plus, X, Check, Eye, Tag, ImagePlus } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "../components/Navbar";
 import { Product } from "../components/ProductCard";
@@ -524,6 +524,16 @@ interface ProductFormProps {
 function ProductForm({ product, onChange }: ProductFormProps) {
   const cats = loadCategories();
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onChange({ ...product, image: ev.target?.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const field = (label: string, key: keyof Product, type = "text") => (
     <div>
       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">{label}</label>
@@ -538,6 +548,28 @@ function ProductForm({ product, onChange }: ProductFormProps) {
 
   return (
     <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+      {/* Image upload */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Зураг</label>
+        <label className="block cursor-pointer group">
+          <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          {product.image ? (
+            <div className="relative w-full h-40 rounded-xl overflow-hidden border border-gray-200 group-hover:border-black transition-colors">
+              <img src={product.image} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-sm font-medium">
+                <ImagePlus className="w-5 h-5" /> Зураг солих
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-40 rounded-xl border-2 border-dashed border-gray-200 group-hover:border-black transition-colors flex flex-col items-center justify-center gap-2 text-gray-400 group-hover:text-black">
+              <ImagePlus className="w-8 h-8" />
+              <span className="text-sm font-medium">Зураг сонгох</span>
+              <span className="text-xs">JPG, PNG, WEBP</span>
+            </div>
+          )}
+        </label>
+      </div>
+
       {field("Нэр", "name")}
       {field("Материал", "material")}
       {field("Үнэ (₮)", "price", "number")}
@@ -555,7 +587,6 @@ function ProductForm({ product, onChange }: ProductFormProps) {
           ))}
         </select>
       </div>
-      {field("Зургийн замчлал", "image")}
       <div className="flex gap-4">
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input type="checkbox" checked={!!product.isNew} onChange={(e) => onChange({ ...product, isNew: e.target.checked })} className="rounded" />
