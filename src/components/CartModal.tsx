@@ -19,7 +19,8 @@ interface CartModalProps {
 
 const BANK = {
   name: "Хаан Банк",
-  account: "5029123456",
+  account: "5570137620",
+  iban: "91000500",
   holder: "Уран Жювелри ХХК",
 };
 
@@ -268,6 +269,10 @@ export default function CartModal({ isOpen, onClose, cart, onRemove, onUpdateQty
                         </div>
                       </div>
                       <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">IBAN</span>
+                        <span className="font-bold text-gray-900 tracking-wider">{BANK.iban}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Хүлээн авагч</span>
                         <span className="font-bold text-gray-900">{BANK.holder}</span>
                       </div>
@@ -307,6 +312,7 @@ export default function CartModal({ isOpen, onClose, cart, onRemove, onUpdateQty
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Төлбөрийн данс</p>
                   <p className="text-sm"><span className="text-gray-500">Банк:</span> <strong>{BANK.name}</strong></p>
                   <p className="text-sm"><span className="text-gray-500">Данс:</span> <strong className="tracking-wider">{BANK.account}</strong></p>
+                  <p className="text-sm"><span className="text-gray-500">IBAN:</span> <strong className="tracking-wider">{BANK.iban}</strong></p>
                   <p className="text-sm"><span className="text-gray-500">Дүн:</span> <strong className="text-gold">₮{total.toLocaleString()}</strong></p>
                 </div>
                 <button onClick={handleClose} className="w-full btn-dark py-3">
