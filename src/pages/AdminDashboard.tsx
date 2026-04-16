@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pencil, Trash2, Plus, X, Check, TrendingUp, TrendingDown } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Check, TrendingUp, TrendingDown, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "../components/Navbar";
 import SalesChart from "../components/SalesChart";
 import { Product } from "../components/ProductCard";
 import { loadProducts, saveProducts } from "../data/products";
+import { loadOrders, updateOrderStatus, deleteOrder, Order } from "../data/orders";
 import { DollarSign, ShoppingBag, Users, Package } from "lucide-react";
 
 const TABS = ["ЗАХИАЛГА", "БАРАА", "АНАЛИЗ", "ТОХИРГОО"];
@@ -17,13 +18,12 @@ const categoryLabels: Record<string, string> = {
   sets: "Мөнгө Хослол",
 };
 
-const initialOrders = [
-  { id: "#0012", customer: "Б. Мөнхзул", date: "2024-04-15", amount: "₮320,000", status: "Хүргэгдсэн", statusColor: "bg-green-100 text-green-700" },
-  { id: "#0011", customer: "Д. Энхтуяа", date: "2024-04-14", amount: "₮195,000", status: "Хүлээгдэж буй", statusColor: "bg-yellow-100 text-yellow-700" },
-  { id: "#0010", customer: "Г. Батбаяр", date: "2024-04-13", amount: "₮480,000", status: "Хүргэлтэд", statusColor: "bg-blue-100 text-blue-700" },
-  { id: "#0009", customer: "О. Сарнай", date: "2024-04-12", amount: "₮260,000", status: "Хүргэгдсэн", statusColor: "bg-green-100 text-green-700" },
-  { id: "#0008", customer: "Н. Төгөлдөр", date: "2024-04-11", amount: "₮145,000", status: "Цуцлагдсан", statusColor: "bg-red-100 text-red-700" },
-];
+const STATUS_COLORS: Record<string, string> = {
+  "Хүлээгдэж буй": "bg-yellow-100 text-yellow-700",
+  "Хүргэлтэд": "bg-blue-100 text-blue-700",
+  "Хүргэгдсэн": "bg-green-100 text-green-700",
+  "Цуцлагдсан": "bg-red-100 text-red-700",
+};
 
 const emptyProduct: Omit<Product, "id"> = {
   name: "",
@@ -45,12 +45,19 @@ const stats = [
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("БАРАА");
+  const [activeTab, setActiveTab] = useState("ЗАХИАЛГА");
   const [products, setProducts] = useState<Product[]>(loadProducts);
-  const [orders, setOrders] = useState(initialOrders);
+  const [orders, setOrders] = useState<Order[]>(loadOrders);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Omit<Product, "id">>(emptyProduct);
+
+  useEffect(() => {
+    const handler = () => setOrders(loadOrders());
+    window.addEventListener("ordersUpdated", handler);
+    return () => window.removeEventListener("ordersUpdated", handler);
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("adminAuth");
@@ -82,7 +89,13 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteOrder = (id: string) => {
-    setOrders((prev) => prev.filter((o) => o.id !== id));
+    deleteOrder(id);
+    setOrders(loadOrders());
+  };
+
+  const handleStatusChange = (id: string, status: Order["status"]) => {
+    updateOrderStatus(id, status);
+    setOrders(loadOrders());
   };
 
   return (
@@ -128,44 +141,70 @@ export default function AdminDashboard() {
 
         {/* ── ЗАХИАЛГА ── */}
         {activeTab === "ЗАХИАЛГА" && (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">Захиалгууд</h2>
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-sm text-gray-500">{orders.length} захиалга</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    {["ЗАХИАЛГЫН ID", "ХЭРЭГЛЭГЧ", "ОГНОО", "ДҮН", "ТӨЛӨВ", ""].map((h) => (
-                      <th key={h} className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors group">
-                      <td className="px-6 py-4 text-sm font-semibold text-gold">{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{order.customer}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{order.date}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-gray-900">{order.amount}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.statusColor}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleDeleteOrder(order.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 rounded text-red-400 hover:text-red-600 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {orders.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
+                <ShoppingBag className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 font-medium">Одоогоор захиалга байхгүй байна</p>
+                <p className="text-sm text-gray-300 mt-1">Хэрэглэгчид захиалга хийхэд энд харагдана</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                      <tr>
+                        {["ID", "ХЭРЭГЛЭГЧ", "УТАС", "ОГНОО", "ДҮН", "ТӨЛӨВ", "ҮЙЛДЭЛ"].map((h) => (
+                          <th key={h} className="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {orders.map((order) => (
+                        <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-5 py-4 text-sm font-bold text-gold">{order.id}</td>
+                          <td className="px-5 py-4 text-sm font-medium text-gray-900">{order.customer}</td>
+                          <td className="px-5 py-4 text-sm text-gray-500">{order.phone}</td>
+                          <td className="px-5 py-4 text-sm text-gray-500">{order.date}</td>
+                          <td className="px-5 py-4 text-sm font-bold text-gray-900">₮{order.total.toLocaleString()}</td>
+                          <td className="px-5 py-4">
+                            <select
+                              value={order.status}
+                              onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
+                              className={`text-xs font-semibold rounded-full px-2 py-1 border-0 cursor-pointer focus:outline-none ${STATUS_COLORS[order.status]}`}
+                            >
+                              <option value="Хүлээгдэж буй">Хүлээгдэж буй</option>
+                              <option value="Хүргэлтэд">Хүргэлтэд</option>
+                              <option value="Хүргэгдсэн">Хүргэгдсэн</option>
+                              <option value="Цуцлагдсан">Цуцлагдсан</option>
+                            </select>
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setSelectedOrder(order)}
+                                className="p-1.5 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-700 transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteOrder(order.id)}
+                                className="p-1.5 hover:bg-red-50 rounded text-red-400 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -287,6 +326,60 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* ── Order Detail Modal ── */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg">Захиалгын дэлгэрэнгүй</h3>
+                  <p className="text-gold text-sm font-semibold">{selectedOrder.id}</p>
+                </div>
+                <button onClick={() => setSelectedOrder(null)} className="p-1 hover:bg-gray-100 rounded-lg">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4">
+                  <div><p className="text-xs text-gray-400">Нэр</p><p className="font-semibold text-gray-900">{selectedOrder.customer}</p></div>
+                  <div><p className="text-xs text-gray-400">Утас</p><p className="font-semibold text-gray-900">{selectedOrder.phone}</p></div>
+                  <div className="col-span-2"><p className="text-xs text-gray-400">Хаяг</p><p className="font-semibold text-gray-900">{selectedOrder.address}</p></div>
+                  {selectedOrder.note && <div className="col-span-2"><p className="text-xs text-gray-400">Тэмдэглэл</p><p className="font-semibold text-gray-900">{selectedOrder.note}</p></div>}
+                  <div><p className="text-xs text-gray-400">Огноо</p><p className="font-semibold text-gray-900">{selectedOrder.date}</p></div>
+                  <div><p className="text-xs text-gray-400">Төлөв</p><span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_COLORS[selectedOrder.status]}`}>{selectedOrder.status}</span></div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Захиалсан бараа</p>
+                  {selectedOrder.items.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                      <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded-lg" />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{item.name}</p>
+                        <p className="text-xs text-gray-400">× {item.quantity}</p>
+                      </div>
+                      <p className="font-bold text-gray-900">₮{(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-bold text-base pt-1">
+                    <span>Нийт</span>
+                    <span className="text-gold">₮{selectedOrder.total.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="w-full mt-5 bg-black text-white py-2.5 rounded-xl text-sm font-bold hover:bg-gray-900 transition-colors">
+                Хаах
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── Edit Product Modal ── */}
       <AnimatePresence>

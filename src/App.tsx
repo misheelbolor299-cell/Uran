@@ -63,6 +63,7 @@ function StoreFront() {
         cart={cart}
         onRemove={removeFromCart}
         onUpdateQty={updateQty}
+        onClearCart={() => setCart([])}
       />
     </div>
   );
