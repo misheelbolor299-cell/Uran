@@ -63,23 +63,6 @@ export default function Hero() {
             </a>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex items-center gap-8 pt-4 border-t border-gray-200"
-          >
-            {[
-              { value: "500+", label: "Бараа" },
-              { value: "2,000+", label: "Хэрэглэгч" },
-              { value: "5★", label: "Үнэлгээ" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                <p className="text-xs text-gray-500 tracking-wide mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
         </div>
 
         {/* Right: Visual */}
