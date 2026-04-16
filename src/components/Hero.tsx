@@ -38,17 +38,7 @@ export default function Hero() {
             <span className="text-gold">мөнх чанар</span>
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-gray-500 text-lg leading-relaxed max-w-md"
-          >
-            925 Мөнгөн болон алтан бүрэх үнэт эдлэлүүд. Монголын уран дархны гарын авлага,
-            эрдэнийн чулуун чимэглэлтэй тансаг зүйлс.
-          </motion.p>
-
-          <motion.div
+<motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
