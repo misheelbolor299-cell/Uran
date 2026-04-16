@@ -31,11 +31,30 @@ export default function ProductGrid({ addToCart }: ProductGridProps) {
   useEffect(() => {
     const handleProducts = () => setProducts(loadProducts());
     const handleCategories = () => setCategories([{ key: "all", label: "Бүгд" }, ...loadCategories()]);
+
+    // same-tab events
     window.addEventListener("productsUpdated", handleProducts);
     window.addEventListener("categoriesUpdated", handleCategories);
+
+    // cross-tab: fires when another tab changes localStorage
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "admin_products") handleProducts();
+      if (e.key === "admin_categories") handleCategories();
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // re-read when user switches back to this tab
+    const handleFocus = () => {
+      handleProducts();
+      handleCategories();
+    };
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       window.removeEventListener("productsUpdated", handleProducts);
       window.removeEventListener("categoriesUpdated", handleCategories);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 
