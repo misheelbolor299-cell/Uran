@@ -32,12 +32,6 @@ const emptyProduct: Omit<Product, "id"> = {
   isSale: false,
 };
 
-const stats = [
-  { title: "Нийт борлуулалт", value: "₮12,450,000", trend: 12, icon: DollarSign, color: "text-gold" },
-  { title: "Захиалгууд", value: "148", trend: 8, icon: ShoppingBag, color: "text-blue-600" },
-  { title: "Хэрэглэгчид", value: "1,024", trend: 5, icon: Users, color: "text-green-600" },
-  { title: "Бараа", value: "36", trend: -2, icon: Package, color: "text-orange-500" },
-];
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
