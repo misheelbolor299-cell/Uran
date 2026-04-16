@@ -72,25 +72,6 @@ export default function Hero() {
               />
             </div>
 
-            {/* Floating badge - top right */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-4 -right-6 bg-white rounded-xl shadow-lg px-4 py-3 border border-gray-100"
-            >
-              <p className="text-xs text-gray-500">Шинэ</p>
-              <p className="text-sm font-bold text-gray-900">Цуглуулга 2026</p>
-            </motion.div>
-
-            {/* Floating badge - bottom left */}
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-              className="absolute bottom-8 -left-6 bg-black text-white rounded-xl shadow-lg px-4 py-3"
-            >
-              <p className="text-xs text-gold">925 Мөнгөн</p>
-              <p className="text-sm font-bold">Баталгаатай</p>
-            </motion.div>
           </div>
         </motion.div>
       </div>
