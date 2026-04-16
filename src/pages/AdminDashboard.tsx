@@ -23,7 +23,7 @@ const emptyCategory: Category = { key: "", label: "" };
 
 const emptyProduct: Omit<Product, "id"> = {
   name: "",
-  material: "925 Мөнгөн",
+  description: "",
   price: 0,
   category: "bracelets",
   stock: 0,
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-5 py-3">
                           <p className="text-sm font-semibold text-gray-900">{product.name}</p>
-                          <p className="text-xs text-gold mt-0.5">{product.material}</p>
+                          {product.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{product.description}</p>}
                         </td>
                         <td className="px-5 py-3 text-sm text-gray-600">{categories.find((c) => c.key === product.category)?.label ?? product.category}</td>
                         <td className="px-5 py-3">
@@ -571,7 +571,16 @@ function ProductForm({ product, onChange }: ProductFormProps) {
       </div>
 
       {field("Нэр", "name")}
-      {field("Материал", "material")}
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Тайлбар</label>
+        <textarea
+          value={product.description ?? ""}
+          onChange={(e) => onChange({ ...product, description: e.target.value })}
+          placeholder="Барааны тайлбар оруулна уу..."
+          rows={3}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors resize-none"
+        />
+      </div>
       {field("Үнэ (₮)", "price", "number")}
       {field("Хөнгөлөлтийн үнэ (₮)", "originalPrice", "number")}
       {field("Нөөц", "stock", "number")}

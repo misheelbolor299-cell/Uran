@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react";
 export interface Product {
   id: number;
   name: string;
-  material: string;
+  description: string;
   price: number;
   originalPrice?: number;
   category: string;
@@ -53,13 +53,13 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
       {/* Info */}
       <div className="p-4 flex flex-col flex-1 gap-1.5">
-        <p className="text-[11px] font-semibold text-gold tracking-widest uppercase">
-          {product.material}
-        </p>
         <h3 className="text-sm font-semibold text-gray-900 leading-snug">{product.name}</h3>
+        {product.description && (
+          <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{product.description}</p>
+        )}
 
         {/* Price row */}
-        <div className="flex items-center justify-between mt-1">
+        <div className="flex items-center justify-between mt-auto pt-2">
           <div className="flex items-center gap-2">
             <span className="text-base font-bold text-gray-900">
               {product.price.toLocaleString()}₮
@@ -76,7 +76,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         {/* Add to cart button */}
         <button
           onClick={() => onAddToCart(product)}
-          className="mt-3 w-full py-2.5 bg-black text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 hover:bg-gold transition-colors duration-200"
+          className="mt-2 w-full py-2.5 bg-black text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 hover:bg-gold transition-colors duration-200"
         >
           <ShoppingCart className="w-3.5 h-3.5" />
           Сагсанд нэмэх
