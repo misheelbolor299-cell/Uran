@@ -64,21 +64,20 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">+976 9911-XXXX</span>
+                <span className="text-sm text-gray-400">+976 8976-4650</span>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">info@uranjewelry.mn</span>
+                <span className="text-sm text-gray-400">togosxonurnaa@gmail.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">Улаанбаатар хот, Монгол улс</span>
+                <span className="text-sm text-gray-400">Central Mall, 2 давхар</span>
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-gold mt-0.5 shrink-0" />
                 <div className="text-sm text-gray-400">
-                  <p>Да-Ба: 10:00–19:00</p>
-                  <p>Бямба: 11:00–17:00</p>
+                  <p>Мягмар–Бүтэнсайн: 10:00–20:00</p>
                 </div>
               </li>
             </ul>
