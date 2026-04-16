@@ -3,14 +3,8 @@ import { motion } from "motion/react";
 import { SlidersHorizontal } from "lucide-react";
 import ProductCard, { Product } from "./ProductCard";
 import { loadProducts } from "../data/products";
+import { loadCategories, Category } from "../data/categories";
 
-const categories = [
-  { key: "all", label: "Бүгд" },
-  { key: "earrings", label: "Ээмэг" },
-  { key: "rings", label: "Бөгж" },
-  { key: "bracelets", label: "Бугуйвч" },
-  { key: "sets", label: "Мөнгө Хослол" },
-];
 
 const sortOptions = [
   { value: "default", label: "Үндсэн" },
@@ -25,15 +19,24 @@ interface ProductGridProps {
 
 export default function ProductGrid({ addToCart }: ProductGridProps) {
   const [products, setProducts] = useState<Product[]>(loadProducts);
+  const [categories, setCategories] = useState<Category[]>(() => [
+    { key: "all", label: "Бүгд" },
+    ...loadCategories(),
+  ]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sort, setSort] = useState("default");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const handler = () => setProducts(loadProducts());
-    window.addEventListener("productsUpdated", handler);
-    return () => window.removeEventListener("productsUpdated", handler);
+    const handleProducts = () => setProducts(loadProducts());
+    const handleCategories = () => setCategories([{ key: "all", label: "Бүгд" }, ...loadCategories()]);
+    window.addEventListener("productsUpdated", handleProducts);
+    window.addEventListener("categoriesUpdated", handleCategories);
+    return () => {
+      window.removeEventListener("productsUpdated", handleProducts);
+      window.removeEventListener("categoriesUpdated", handleCategories);
+    };
   }, []);
 
   const counts = useMemo(() => {

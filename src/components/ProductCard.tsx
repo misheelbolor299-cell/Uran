@@ -7,7 +7,7 @@ export interface Product {
   material: string;
   price: number;
   originalPrice?: number;
-  category: "earrings" | "rings" | "bracelets" | "sets";
+  category: string;
   stock: number;
   image: string;
   isNew?: boolean;

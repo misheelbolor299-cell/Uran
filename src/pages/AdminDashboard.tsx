@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pencil, Trash2, Plus, X, Check, TrendingUp, TrendingDown, Eye } from "lucide-react";
+import { Trash2, Plus, X, Check, Eye, Tag } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "../components/Navbar";
-import SalesChart from "../components/SalesChart";
 import { Product } from "../components/ProductCard";
 import { loadProducts, saveProducts } from "../data/products";
 import { loadOrders, updateOrderStatus, deleteOrder, Order } from "../data/orders";
-import { DollarSign, ShoppingBag, Users, Package } from "lucide-react";
+import { loadCategories, saveCategories, Category } from "../data/categories";
+import { ShoppingBag } from "lucide-react";
 
-const TABS = ["ЗАХИАЛГА", "БАРАА", "АНАЛИЗ", "ТОХИРГОО"];
+const TABS = ["ЗАХИАЛГА", "БАРАА", "АНГИЛАЛ", "ТОХИРГОО"];
 
-const categoryLabels: Record<string, string> = {
-  earrings: "Ээмэг",
-  rings: "Бөгж",
-  bracelets: "Бугуйвч",
-  sets: "Мөнгө Хослол",
-};
 
 const STATUS_COLORS: Record<string, string> = {
   "Хүлээгдэж буй": "bg-yellow-100 text-yellow-700",
@@ -24,6 +18,8 @@ const STATUS_COLORS: Record<string, string> = {
   "Хүргэгдсэн": "bg-green-100 text-green-700",
   "Цуцлагдсан": "bg-red-100 text-red-700",
 };
+
+const emptyCategory: Category = { key: "", label: "" };
 
 const emptyProduct: Omit<Product, "id"> = {
   name: "",
@@ -52,6 +48,9 @@ export default function AdminDashboard() {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Omit<Product, "id">>(emptyProduct);
+  const [categories, setCategories] = useState<Category[]>(loadCategories);
+  const [newCategory, setNewCategory] = useState<Category>(emptyCategory);
+  const [editCategory, setEditCategory] = useState<Category | null>(null);
 
   useEffect(() => {
     const handler = () => setOrders(loadOrders());
@@ -96,6 +95,30 @@ export default function AdminDashboard() {
   const handleStatusChange = (id: string, status: Order["status"]) => {
     updateOrderStatus(id, status);
     setOrders(loadOrders());
+  };
+
+  const handleAddCategory = () => {
+    if (!newCategory.key.trim() || !newCategory.label.trim()) return;
+    const key = newCategory.key.toLowerCase().replace(/\s+/g, "_");
+    if (categories.find((c) => c.key === key)) return;
+    const updated = [...categories, { key, label: newCategory.label }];
+    setCategories(updated);
+    saveCategories(updated);
+    setNewCategory(emptyCategory);
+  };
+
+  const handleDeleteCategory = (key: string) => {
+    const updated = categories.filter((c) => c.key !== key);
+    setCategories(updated);
+    saveCategories(updated);
+  };
+
+  const handleSaveCategory = () => {
+    if (!editCategory) return;
+    const updated = categories.map((c) => (c.key === editCategory.key ? editCategory : c));
+    setCategories(updated);
+    saveCategories(updated);
+    setEditCategory(null);
   };
 
   return (
@@ -242,7 +265,7 @@ export default function AdminDashboard() {
                           <p className="text-sm font-semibold text-gray-900">{product.name}</p>
                           <p className="text-xs text-gold mt-0.5">{product.material}</p>
                         </td>
-                        <td className="px-5 py-3 text-sm text-gray-600">{categoryLabels[product.category]}</td>
+                        <td className="px-5 py-3 text-sm text-gray-600">{categories.find((c) => c.key === product.category)?.label ?? product.category}</td>
                         <td className="px-5 py-3">
                           <p className="text-sm font-bold text-gray-900">{product.price.toLocaleString()}₮</p>
                           {product.originalPrice && (
@@ -275,27 +298,82 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── АНАЛИЗ ── */}
-        {activeTab === "АНАЛИЗ" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-              {stats.map((s, i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gray-50 ${s.color}`}>
-                      <s.icon className="w-5 h-5" />
-                    </div>
-                    <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${s.trend >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
-                      {s.trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {Math.abs(s.trend)}%
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500">{s.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{s.value}</p>
-                </div>
-              ))}
+        {/* ── АНГИЛАЛ ── */}
+        {activeTab === "АНГИЛАЛ" && (
+          <div className="max-w-xl space-y-6">
+            {/* Add new category */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Tag className="w-4 h-4" /> Шинэ ангилал нэмэх
+              </h2>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder="Нэр (жш: Ээмэг)"
+                  value={newCategory.label}
+                  onChange={(e) => setNewCategory({ label: e.target.value, key: e.target.value.toLowerCase().replace(/\s+/g, "_") })}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddCategory()}
+                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black transition-colors"
+                />
+                <button
+                  onClick={handleAddCategory}
+                  className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-900 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Нэмэх
+                </button>
+              </div>
             </div>
-            <SalesChart />
+
+            {/* Categories list */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <p className="font-bold text-gray-900">Ангилалууд <span className="text-gray-400 font-normal text-sm">({categories.length})</span></p>
+              </div>
+              {categories.length === 0 ? (
+                <div className="py-12 text-center text-gray-400 text-sm">Ангилал байхгүй байна</div>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {categories.map((cat) => (
+                    <li key={cat.key} className="flex items-center gap-3 px-6 py-4">
+                      {editCategory?.key === cat.key ? (
+                        <>
+                          <input
+                            autoFocus
+                            type="text"
+                            value={editCategory.label}
+                            onChange={(e) => setEditCategory({ ...editCategory, label: e.target.value })}
+                            onKeyDown={(e) => e.key === "Enter" && handleSaveCategory()}
+                            className="flex-1 border border-black rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+                          />
+                          <button onClick={handleSaveCategory} className="p-1.5 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors">
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setEditCategory(null)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                            <X className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900">{cat.label}</p>
+                            <p className="text-xs text-gray-400 font-mono">{cat.key}</p>
+                          </div>
+                          <span className="text-xs text-gray-400 mr-2">
+                            {products.filter((p) => p.category === cat.key).length} бараа
+                          </span>
+                          <button onClick={() => setEditCategory({ ...cat })} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-700">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDeleteCategory(cat.key)} className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-red-400 hover:text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         )}
 
@@ -450,6 +528,8 @@ interface ProductFormProps {
 }
 
 function ProductForm({ product, onChange }: ProductFormProps) {
+  const cats = loadCategories();
+
   const field = (label: string, key: keyof Product, type = "text") => (
     <div>
       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">{label}</label>
@@ -473,13 +553,12 @@ function ProductForm({ product, onChange }: ProductFormProps) {
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Ангилал</label>
         <select
           value={product.category}
-          onChange={(e) => onChange({ ...product, category: e.target.value as Product["category"] })}
+          onChange={(e) => onChange({ ...product, category: e.target.value })}
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
         >
-          <option value="bracelets">Бугуйвч</option>
-          <option value="rings">Бөгж</option>
-          <option value="earrings">Ээмэг</option>
-          <option value="sets">Мөнгө Хослол</option>
+          {cats.map((c) => (
+            <option key={c.key} value={c.key}>{c.label}</option>
+          ))}
         </select>
       </div>
       {field("Зургийн замчлал", "image")}
